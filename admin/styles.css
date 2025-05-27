@@ -1,0 +1,51 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header.Riad {
+  background-color: #333;
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+header.Riad .logo a {
+  color: white;
+  text-decoration: none;
+  font-size: 24px;
+}
+
+header.Riad nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+header.Riad nav ul li {
+  display: inline;
+  margin: 0 10px;
+}
+
+header.Riad nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.content {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  header.Riad nav ul {
+      text-align: center;
+  }
+
+  header.Riad nav ul li {
+      display: block;
+      margin: 10px 0;
+  }
+}

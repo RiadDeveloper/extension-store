@@ -1,0 +1,130 @@
+/* Base styles for light mode */
+.light {
+    --bg-color: #ffffff; /* Light background color */
+    --text-color: #333333; /* Dark text color */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  
+  /* Dark mode base styles */
+  .dark {
+    --bg-color: #1a202c; /* Dark background color */
+    --text-color: #cbd5e0; /* Light text color */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  
+  /* General element adjustments for both light and dark modes */
+  .bg-white {
+    background-color: var(--bg-color);
+  }
+  
+  .text-gray-800 {
+    color: var(--text-color);
+  }
+  
+  .border-gray-200 {
+    border-color: #e2e8f0; /* Default light border color */
+  }
+  
+  .hover\:bg-gray-200:hover {
+    background-color: #f7fafc; /* Default light hover background */
+  }
+  
+  /* Dark mode adjustments for specific elements */
+  .dark .bg-white {
+    background-color: var(--bg-color); /* Override white background in dark mode */
+  }
+  
+  .dark .text-gray-800 {
+    color: var(--text-color); /* Adjust text color in dark mode */
+  }
+  
+  .dark .border-gray-200 {
+    border-color: #4a5568; /* Darker border color in dark mode */
+  }
+  
+  /* Dark mode hover state for background color */
+  .dark .hover\:bg-gray-200:hover {
+    background-color: #4a5568; /* Darker hover background in dark mode */
+  }
+  
+  /* Additional styles to ensure dropdown compatibility */
+  .dropdown-menu {
+    background-color: var(--bg-color); /* Match dropdown menu background */
+  }
+  
+  .dropdown-menu a {
+    color: var(--text-color); /* Match text color in dropdown */
+  }
+  
+  .dropdown-menu a:hover {
+    background-color: #e2e8f0; /* Light hover background */
+  }
+  
+  /* Dark mode dropdown menu adjustments */
+  .dark .dropdown-menu {
+    background-color: var(--bg-color); /* Dark mode dropdown menu background */
+  }
+  
+  .dark .dropdown-menu a {
+    color: var(--text-color); /* Dark mode text color in dropdown */
+  }
+  
+  .dark .dropdown-menu a:hover {
+    background-color: #4a5568; /* Darker hover background in dark mode dropdown */
+  }
+  
+  /* Dropdown menu styling */
+  #dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem; /* Space between profile and dropdown */
+    width: 150px;
+    border-radius: 0.4rem; /* Rounded corners */
+    z-index: 10; /* Ensures dropdown appears above other content */
+  }
+  
+  /* Individual dropdown items */
+  #dropdown-menu a {
+    display: block;
+    padding: 0.4rem; /* Padding inside the dropdown items */
+    text-decoration: none;
+    font-size: 0.875rem; /* Slightly smaller text */
+  }
+  
+  /* Profile container cursor */
+  #user-profile {
+    cursor: pointer;
+  }
+  
+  /* Responsive utilities */
+  .md\:block {
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    /* Hide profile name on smaller screens */
+    .md\:block {
+      display: none;
+    }
+  }
+  
+  /* Logo styling */
+  .logo {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+  }
+  
+  .logo img {
+    height: 40px; /* Logo height */
+  }
+  
+  .logo p {
+    margin-left: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  
