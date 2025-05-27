@@ -1,0 +1,129 @@
+/* Markdown Styles */
+.documentation-content {
+    line-height: 1.6;
+}
+
+.documentation-content h1 {
+    font-size: 2em;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.documentation-content h2 {
+    font-size: 1.5em;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.documentation-content h3 {
+    font-size: 1.2em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.documentation-content p {
+    margin-bottom: 1em;
+}
+
+.documentation-content ul, 
+.documentation-content ol {
+    margin-left: 2em;
+    margin-bottom: 1em;
+}
+
+.documentation-content ul {
+    list-style-type: disc;
+}
+
+.documentation-content ol {
+    list-style-type: decimal;
+}
+
+.documentation-content code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.documentation-content pre {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.documentation-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.documentation-content blockquote {
+    border-left: 4px solid rgba(255, 255, 255, 0.2);
+    padding-left: 1em;
+    margin-left: 0;
+    margin-bottom: 1em;
+    font-style: italic;
+}
+
+.documentation-content a {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+.documentation-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 1em 0;
+    border-radius: 5px;
+    display: block;
+}
+
+/* Enhanced table styles */
+.table-responsive {
+    overflow-x: auto;
+    margin: 1em 0;
+    padding: 0;
+    background: transparent;
+}
+
+.documentation-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    background: transparent;
+}
+
+.documentation-content td,
+.documentation-content th {
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Special handling for table cells with images */
+.documentation-content td img {
+    margin: 0;
+    max-width: none;
+    width: auto;
+    height: auto;
+    display: inline-block;
+}
+
+/* Table cell with multiple images */
+.documentation-content td:has(img) {
+    white-space: nowrap;
+}
+
+.documentation-content td:has(img) img {
+    max-height: 300px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 5px;
+} 
