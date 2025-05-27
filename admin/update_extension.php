@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $platforms_str = implode(", ", $platforms);
     
     $downloads = 0;
-    $paid_ar_free = $_POST['paid_ar_free'] ?? 'FREE';
+    $price = $_POST['price'] ?? 'FREE';
     $download_link = $_POST['download_link'];
     $extension_name = $_POST['extension_name'];
     $extension_package = $_POST['extension_package'];
@@ -52,9 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $last_update = date("d F Y");
 
-    $query = "UPDATE extension SET Latest_Version = ?, Platform = ?, Downloads = ?, paid_ar_free = ?, Download_link = ?, extension_name = ?, extension_package = ?, description = ?, last_update = ?, user_id = ?, extension_price = ?, html_content = ?, github_file_name = ? WHERE extension_id = ?";
+    $query = "UPDATE extension SET Latest_Version = ?, Platform = ?, Downloads = ?, price = ?, Download_link = ?, extension_name = ?, extension_package = ?, description = ?, last_update = ?, user_id = ?, extension_price = ?, html_content = ?, github_file_name = ? WHERE extension_id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssssssssssss", $latest_version, $platforms_str, $downloads, $paid_ar_free, $download_link, $extension_name, $extension_package, $description, $last_update, $user_id, $extension_price, $html_content, $github_file_name, $extension_id);
+    $stmt->bind_param("ssssssssssssss", $latest_version, $platforms_str, $downloads, $price, $download_link, $extension_name, $extension_package, $description, $last_update, $user_id, $extension_price, $html_content, $github_file_name, $extension_id);
 
     if ($stmt->execute()) {
         $message = "<p class='success-message'>Extension updated successfully!</p>";
@@ -72,6 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Extension</title>
+    <link rel="stylesheet" href="../assets/css/markdown.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -282,6 +284,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 font-size: 20px;
             }
         }
+
+        /* Additional styles for the preview */
+        #html_content {
+            font-family: monospace;
+            min-height: 300px;
+        }
+        
+        .preview-container {
+            color: inherit;
+        }
+        
+        .preview-tabs {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .preview-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+        }
+        
+        .preview-tab.active {
+            background-color: #fff;
+            border-color: #ddd;
+            border-bottom-color: #fff;
+            margin-bottom: -1px;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 
@@ -330,11 +372,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="form-group">
                     <label for="paid_ar_free">PAID or FREE:</label>
-                    <select id="paid_ar_free" name="paid_ar_free">
-                        <option value="FREE" <?php echo ($extension_data['paid_ar_free'] == 'FREE') ? 'selected' : ''; ?>>
+                    <select id="paid_ar_free" name="price">
+                        <option value="FREE" <?php echo ($extension_data['price'] == 'FREE') ? 'selected' : ''; ?>>
                             FREE
                         </option>
-                        <option value="PAID" <?php echo ($extension_data['paid_ar_free'] == 'PAID') ? 'selected' : ''; ?>>
+                        <option value="PAID" <?php echo ($extension_data['price'] == 'PAID') ? 'selected' : ''; ?>>
                             PAID
                         </option>
                     </select>
@@ -365,9 +407,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="form-group">
-                    <label for="html_content">HTML Content:</label>
-                    <textarea id="html_content" name="html_content"
-                        required><?php echo htmlspecialchars($extension_data['html_content']); ?></textarea>
+                    <label for="html_content">Content (Supports both Markdown and HTML):</label>
+                    <textarea id="html_content" name="html_content" required><?php echo htmlspecialchars($extension_data['html_content']); ?></textarea>
+                    <small class="form-text text-muted">You can use Markdown or HTML. For Markdown, use # for headers, ** for bold, * for italic, etc.</small>
                 </div>
 
                 <div class="form-group">
@@ -379,16 +421,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <div class="preview-container">
-            <div id="documentation" class="documentation-section"></div>
+            <div class="preview-tabs">
+                <div class="preview-tab active" onclick="switchTab('preview')">Preview</div>
+                <div class="preview-tab" onclick="switchTab('source')">Source</div>
+            </div>
+            <div id="preview_tab" class="tab-content active">
+                <div id="documentation" class="documentation-content"></div>
+            </div>
+            <div id="source_tab" class="tab-content">
+                <pre><code id="source_preview"></code></pre>
+            </div>
         </div>
     </div>
 
     <script>
+        // Initialize marked with options
+        marked.setOptions({
+            breaks: true,           // Enable line breaks
+            gfm: true,             // Enable GitHub Flavored Markdown
+            headerIds: false,       // Disable header IDs
+            mangle: false,         // Disable name mangling
+            headerPrefix: '',      // No prefix for headers
+            pedantic: false,       // Be more forgiving with Markdown syntax
+            sanitize: false,       // Allow HTML in Markdown
+            smartLists: true,      // Use smarter list behavior
+            smartypants: true,     // Use smart punctuation
+            xhtml: false           // Don't close single tags
+        });
+
         const maxSelection = 3;
         const cards = document.querySelectorAll('.card');
         const hiddenInput = document.getElementById('platform_hidden');
         const htmlContentArea = document.getElementById('html_content');
         const documentationSection = document.getElementById('documentation');
+        const sourcePreview = document.getElementById('source_preview');
 
         // Initialize selected cards
         const initialSelection = <?php echo json_encode($selectedPlatforms); ?>;
@@ -424,11 +490,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             hiddenInput.value = values.join(', ');
         }
 
-        htmlContentArea.addEventListener('input', () => {
-            documentationSection.innerHTML = htmlContentArea.value;
-        });
+        // Function to switch between preview tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'preview') {
+                document.querySelector('.preview-tab:first-child').classList.add('active');
+                document.getElementById('preview_tab').classList.add('active');
+            } else {
+                document.querySelector('.preview-tab:last-child').classList.add('active');
+                document.getElementById('source_tab').classList.add('active');
+            }
+        }
 
-        documentationSection.innerHTML = htmlContentArea.value;
+        // Function to update preview
+        function updatePreview() {
+            const content = htmlContentArea.value;
+            
+            // Always show the source
+            sourcePreview.textContent = content;
+            
+            try {
+                // Try to parse as Markdown first
+                const htmlContent = marked.parse(content);
+                documentationSection.innerHTML = htmlContent;
+            } catch (e) {
+                // If Markdown parsing fails, treat as HTML
+                documentationSection.innerHTML = content;
+            }
+        }
+
+        // Add input event listener
+        htmlContentArea.addEventListener('input', updatePreview);
+
+        // Initial preview
+        updatePreview();
     </script>
 </body>
 

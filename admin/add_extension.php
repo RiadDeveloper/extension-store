@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
     $platforms_str = implode(", ", $platforms); // Convert array to comma-separated string
     
     $downloads = 0; // Default value for downloads
-    $paid_ar_free = $_POST['paid_ar_free'] ?? 'FREE';
+    $price = $_POST['price'] ?? 'FREE';
     $download_link = $_POST['download_link'];
     $extension_name = $_POST['extension_name'];
     $extension_package = $_POST['extension_package'];
@@ -43,9 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
     $extension_id = uniqid(); // Generate a unique extension ID
 
     // Insert data into the database
-    $query = "INSERT INTO extension (Released_On, Latest_Version, Platform, Downloads, paid_ar_free, Download_link, extension_name, extension_id, extension_package, description, last_update, user_id, extension_price, html_content, github_file_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO extension (Released_On, Latest_Version, Platform, Downloads, price, Download_link, extension_name, extension_id, extension_package, description, last_update, user_id, extension_price, html_content, github_file_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssssssssssssss", $released_on, $latest_version, $platforms_str, $downloads, $paid_ar_free, $download_link, $extension_name, $extension_id, $extension_package, $description, $last_update, $user_id, $extension_price, $html_content, $github_file_name);
+    $stmt->bind_param("sssssssssssssss", $released_on, $latest_version, $platforms_str, $downloads, $price, $download_link, $extension_name, $extension_id, $extension_package, $description, $last_update, $user_id, $extension_price, $html_content, $github_file_name);
 
     if ($stmt->execute()) {
         // Redirect to a new page (e.g., a list of extensions or a success page)
@@ -64,6 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Extension</title>
+    <link rel="stylesheet" href="../assets/css/markdown.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* General Styles */
         body {
@@ -245,6 +247,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
                 font-size: 20px;
             }
         }
+
+        /* Additional styles for the preview */
+        #html_content {
+            font-family: monospace;
+            min-height: 300px;
+        }
+        
+        .preview-container {
+            color: inherit;
+        }
+        
+        .preview-tabs {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .preview-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+        }
+        
+        .preview-tab.active {
+            background-color: #fff;
+            border-color: #ddd;
+            border-bottom-color: #fff;
+            margin-bottom: -1px;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -311,17 +353,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
                 </div>
 
                 <div class="form-group">
-                    <label for="html_content">HTML Content:</label>
+                    <label for="html_content">Content (Supports both Markdown and HTML):</label>
                     <textarea id="html_content" name="html_content" onkeyup="updatePreview()" required></textarea>
+                    <small class="form-text text-muted">You can use Markdown or HTML. For Markdown, use # for headers, ** for bold, * for italic, etc.</small>
                 </div>
             </form>
         </div>
         <div class="preview-container">
-            <div id="live_preview" class="documentation-section"></div>
+            <div class="preview-tabs">
+                <div class="preview-tab active" onclick="switchTab('preview')">Preview</div>
+                <div class="preview-tab" onclick="switchTab('source')">Source</div>
+            </div>
+            <div id="preview_tab" class="tab-content active">
+                <div id="live_preview" class="documentation-content"></div>
+            </div>
+            <div id="source_tab" class="tab-content">
+                <pre><code id="source_preview"></code></pre>
+            </div>
         </div>
     </div>
 
     <script>
+        // Initialize marked with options
+        marked.setOptions({
+            breaks: true,           // Enable line breaks
+            gfm: true,             // Enable GitHub Flavored Markdown
+            headerIds: false,       // Disable header IDs
+            mangle: false,         // Disable name mangling
+            headerPrefix: '',      // No prefix for headers
+            pedantic: false,       // Be more forgiving with Markdown syntax
+            sanitize: false,       // Allow HTML in Markdown
+            smartLists: true,      // Use smarter list behavior
+            smartypants: true,     // Use smart punctuation
+            xhtml: false           // Don't close single tags
+        });
+
         // JavaScript for handling platform selection
         const cards = document.querySelectorAll('.card');
         const maxSelection = 3;
@@ -355,12 +421,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_extension'])) {
             });
         });
 
-        // JavaScript for live HTML preview
-        function updatePreview() {
-            const htmlContent = document.getElementById('html_content').value;
-            const livePreview = document.getElementById('live_preview');
-            livePreview.innerHTML = htmlContent;
+        // Function to switch between preview tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'preview') {
+                document.querySelector('.preview-tab:first-child').classList.add('active');
+                document.getElementById('preview_tab').classList.add('active');
+            } else {
+                document.querySelector('.preview-tab:last-child').classList.add('active');
+                document.getElementById('source_tab').classList.add('active');
+            }
         }
+
+        // Function to update preview
+        function updatePreview() {
+            const content = document.getElementById('html_content').value;
+            const previewDiv = document.getElementById('live_preview');
+            const sourceDiv = document.getElementById('source_preview');
+
+            // Always show the source
+            sourceDiv.textContent = content;
+            
+            try {
+                // Try to parse as Markdown first
+                const htmlContent = marked.parse(content);
+                previewDiv.innerHTML = htmlContent;
+            } catch (e) {
+                // If Markdown parsing fails, treat as HTML
+                previewDiv.innerHTML = content;
+            }
+        }
+
+        // Initial preview update
+        updatePreview();
+
+        // Add input event listener for real-time updates
+        document.getElementById('html_content').addEventListener('input', updatePreview);
     </script>
 </body>
 </html>
